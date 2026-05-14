@@ -1,8 +1,9 @@
-from fastapi import FastAPI, Path, Body  # Импортируем Path вместо Body
-from pydantic import EmailStr
+from fastapi import FastAPI, Path
 import uvicorn
+from user.view import router as user_router
 
 app = FastAPI()
+app.include_router(user_router)
 
 
 @app.get("/items/")
@@ -19,14 +20,6 @@ def get_item_by_id(item_id: int = Path()):
     return {
         "message": "successful",
         "id": item_id,
-    }
-
-@app.post("/users/")
-def create_user(email: EmailStr = Body()):
-    return {
-        "message": "success",
-        "email": email,
-
     }
 
 
