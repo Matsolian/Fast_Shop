@@ -9,10 +9,10 @@ class DatabaseHelper:
             echo=settings.db_echo,
         )
         self.session_maker = async_sessionmaker(
-            bind=self.engine,
-            autoflush=False,
-            autocommit=False,
-            expire_on_commit=False,
+            bind=self.engine,  # какой движок использовать
+            autoflush=False,  # не отправлять запросы автоматически
+            autocommit=False,  # не сохранять изменения автоматически
+            expire_on_commit=False,  # не сбрасывать объекты после commit
         )
 
 
