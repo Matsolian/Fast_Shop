@@ -9,7 +9,7 @@ authors = [
     {name = "Matsoilan"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "fastapi (>=0.136.1,<0.137.0)",
     "uvicorn[standart] (>=0.46.0,<0.47.0)",
