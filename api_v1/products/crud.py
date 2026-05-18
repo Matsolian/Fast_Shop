@@ -22,5 +22,5 @@ async def create_product(session: AsyncSession, product_in: ProductCreate) -> Pr
     product = Product(**product_in.model_dump())
     session.add(product)
     await session.commit()
-    # await session.refresh(Product)
+    # await session.refresh(Product) если надо будет пересобрать
     return product

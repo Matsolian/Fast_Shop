@@ -15,22 +15,28 @@ class DatabaseHelper:
             echo=echo,
         )
         self.session_factory = async_sessionmaker(  # Фабрика подключений к БД
+            bind=self.engine,
             autoflush=False,  # не отправлять запросы автоматически
             autocommit=False,  # не сохранять изменения автоматически
             expire_on_commit=False,  # не сбрасывать объекты после commit
         )
 
-    def get_scoped_session(self):
+    def get_scoped_session(self):  # создать сессию
         session = async_scoped_session(
             session_factory=self.session_factory,
             scopefunc=current_task,
         )
         return session
 
-    async def session_dependency(self) -> AsyncSession:
-        async with self.get_scoped_session() as session:
+    async def session_dependency(self) -> AsyncSession:  # подключиться к сессии
+        async with self.session_factory() as session:
             yield session
-            await session.remove()
+            await session.close()
+
+    async def scooped_session_dependency(self) -> AsyncSession:  # подключиться к сессии
+        session = self.get_scoped_session()
+        yield session
+        await session.close()
 
 
 db_helper = DatabaseHelper(

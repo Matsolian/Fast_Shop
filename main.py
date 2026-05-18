@@ -3,17 +3,22 @@ import uvicorn
 from user.view import router as user_router
 from contextlib import asynccontextmanager
 from core.models import Base, db_helper
+from core.config import settings
+from api_v1.products import router as api_v1
 
 
-@asynccontextmanager   #запуск новой БД
+@asynccontextmanager  # запуск новой БД
 async def lifespan(app: FastAPI):
-    async with db_helper.engine.begin() as conn:   # db_helper.engine.begin()  это asyncio из мира BD
+    async with (
+        db_helper.engine.begin() as conn
+    ):  # db_helper.engine.begin()  это asyncio из мира BD
         await conn.run_sync(Base.metadata.create_all)
-    yield #Что делаем в конце
+    yield  # Что делаем в конце
 
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)
+app.include_router(router=api_v1, prefix=settings.api_v1_prefix)
 
 
 @app.get("/items/")
