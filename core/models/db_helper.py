@@ -10,11 +10,11 @@ from core.config import settings
 
 class DatabaseHelper:
     def __init__(self, url: str, echo: bool = False):
-        self.engine = create_async_engine(
+        self.engine = create_async_engine(  # Движок для запуска БД
             url=url,
-            echo=settings.db_echo,
+            echo=echo,
         )
-        self.session_factory = async_sessionmaker(
+        self.session_factory = async_sessionmaker(  # Фабрика подключений к БД
             autoflush=False,  # не отправлять запросы автоматически
             autocommit=False,  # не сохранять изменения автоматически
             expire_on_commit=False,  # не сбрасывать объекты после commit

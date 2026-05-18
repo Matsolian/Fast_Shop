@@ -5,11 +5,11 @@ from contextlib import asynccontextmanager
 from core.models import Base, db_helper
 
 
-@asynccontextmanager
+@asynccontextmanager   #запуск новой БД
 async def lifespan(app: FastAPI):
-    async with db_helper.engine.begin() as conn:
+    async with db_helper.engine.begin() as conn:   # db_helper.engine.begin()  это asyncio из мира BD
         await conn.run_sync(Base.metadata.create_all)
-    yield
+    yield #Что делаем в конце
 
 
 app = FastAPI(lifespan=lifespan)
