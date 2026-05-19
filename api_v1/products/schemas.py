@@ -7,10 +7,11 @@ class ProductBase(BaseModel): #основа
     price: int
 
 
-class ProductCreate(ProductBase):  # чтобы создавать
+class ProductCreate(ProductBase):  # чтобы создавать из JSON формата
     pass
 
 
-class Product(ProductBase):  # выдавать данные
-    model_config = ConfigDict(from_attributes=True)
+class Product(ProductBase):  # выдавать данные, по умолчанию не JSON, а SQLAlchemy объект
+    model_config = ConfigDict(from_attributes=True)   # позволдяет принимать не только словари, но и объекты(благодаря флагу)
     id: int
+ 

@@ -8,10 +8,11 @@ router = APIRouter(tags=["Products"])
 
 
 @router.get("/", response_model=list[Product])
+# вот как раз здесь и нужен был from_attributes=True в Product
 async def get_products(
     session: AsyncSession = Depends(
         db_helper.scooped_session_dependency
-    ),  # обратиться к текцщей сессиии
+    ),  # обратиться к текущей сессиии через Dependsю Вызываем опередлелнного официанта
 ):
     return await crud.get_products(session=session)
 
@@ -26,7 +27,8 @@ async def create_product(
 
 @router.get("/{product_id}", response_model=Product)
 async def get_product_id(
-    product_id: int, session: AsyncSession = Depends(db_helper.scooped_session_dependency)
+    product_id: int,
+    session: AsyncSession = Depends(db_helper.scooped_session_dependency),
 ):
     product = await crud.get_product(session=session, product_id=product_id)
     if product is not None:
