@@ -1,4 +1,3 @@
-from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, status, Depends
 from core.models import db_helper, Product

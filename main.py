@@ -7,13 +7,16 @@ from core.config import settings
 from api_v1.products import router as api_v1
 
 
-@asynccontextmanager  # запуск новой БД
+@asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with (
-        db_helper.engine.begin() as conn
-    ):  # db_helper.engine.begin()  это asyncio из мира BD
+    # При старте — создаём все таблицы
+    async with db_helper.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    yield  # Что делаем в конце
+    
+    yield  # приложение работает
+    
+    # При остановке — закрываем engine (освобождаем соединения)
+    await db_helper.engine.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

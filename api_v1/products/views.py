@@ -53,7 +53,7 @@ async def update_product(
 @router.patch("/{product_id}")
 async def update_product_partial(
     product_update: ProductUpdatePartial,
-    product: Product = Depends(product_by_id),
+    product: Product = Depends(product  _by_id),
     session: AsyncSession = Depends(db_helper.scooped_session_dependency),
 ):
     return await crud.update_product_partial(
