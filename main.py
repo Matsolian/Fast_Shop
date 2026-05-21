@@ -2,21 +2,14 @@ from fastapi import FastAPI, Path
 import uvicorn
 from user.view import router as user_router
 from contextlib import asynccontextmanager
-from core.models import Base, db_helper
 from core.config import settings
 from api_v1.products import router as api_v1
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # При старте — создаём все таблицы
-    async with db_helper.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    yield  # приложение работает
-    
-    # При остановке — закрываем engine (освобождаем соединения)
-    await db_helper.engine.dispose()
+
+    yield
 
 
 app = FastAPI(lifespan=lifespan)
