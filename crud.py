@@ -69,7 +69,7 @@ async def create_posts(
     return posts
 
 
-async def get_users_with_posts(   # Один ко многим
+async def get_users_with_posts(  # Один ко многим
     session: AsyncSession,
 ):
 
@@ -83,7 +83,6 @@ async def get_users_with_posts(   # Один ко многим
     users = await session.scalars(stmt)  # подход 1 and 3
     result: Result = await session.execute(stmt)
 
-
     for user in users:  # type: user
         print("**" * 10)
         print(user)
@@ -91,7 +90,7 @@ async def get_users_with_posts(   # Один ко многим
             print("-", post)
 
 
-async def get_users_with_posts_and_profiles(  
+async def get_users_with_posts_and_profiles(
     session: AsyncSession,
 ):
     stmt = select(User).options(
@@ -125,35 +124,37 @@ async def get_profiles_with_users_with_posts(session: AsyncSession):
         print(profile.user.posts)
 
 
-async def main_ralations(session:AsyncSession):
-        # await create_user(sesion=session, username="Bob")
-        # # await create_user(sesion=session, username="Rock")
-        # user_bob = await get_user_by_username(sesion=session, username="Bob")
-        # user_john = await get_user_by_username(sesion=session, username="John")
-        # user_rock = await get_user_by_username(sesion=session, username="Rock")
-        # await create_user_profile(
-        #     session=session,
-        #     user_id=user_john.id,
-        #     first_name="John",
-        # )
-        # await create_user_profile(
-        #     session=session,
-        #     user_id=user_bob.id,
-        #     first_name="Luci",
-        # )
-        # await show_users_with_profile(session=session)
-        # await create_posts(session, user_bob.id, "Hello my friends")
-        # await create_posts(session, user_john.id, "I learned Fast API")
-        # await get_users_with_posts(session=session)
-        # await get_users_with_posts_and_profiles(session=session)
-        await get_profiles_with_users_with_posts(session=session)
+async def main_ralations(session: AsyncSession):
+    # await create_user(sesion=session, username="Bob")
+    # # await create_user(sesion=session, username="Rock")
+    # user_bob = await get_user_by_username(sesion=session, username="Bob")
+    # user_john = await get_user_by_username(sesion=session, username="John")
+    # user_rock = await get_user_by_username(sesion=session, username="Rock")
+    # await create_user_profile(
+    #     session=session,
+    #     user_id=user_john.id,
+    #     first_name="John",
+    # )
+    # await create_user_profile(
+    #     session=session,
+    #     user_id=user_bob.id,
+    #     first_name="Luci",
+    # )
+    # await show_users_with_profile(session=session)
+    # await create_posts(session, user_bob.id, "Hello my friends")
+    # await create_posts(session, user_john.id, "I learned Fast API")
+    # await get_users_with_posts(session=session)
+    # await get_users_with_posts_and_profiles(session=session)
+    await get_profiles_with_users_with_posts(session=session)
 
+
+async def demo_m2m(session: AsyncSession):  # many to many
+    pass
 
 
 async def main():
     async with db_helper.session_factory() as session:
-       await main_ralations(session=session)
-
+        await main_ralations(session=session)
 
 
 if __name__ == "__main__":
