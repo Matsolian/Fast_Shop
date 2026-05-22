@@ -57,12 +57,25 @@ async def show_users_with_profile(
         else:
             print("User don't have profile")
 
+
+async def create_posts(
+    session: AsyncSession,
+    user_id: int,
+    *posts_titles: str,
+) -> list[Post]:
+    posts = [Post(title=title, user_id=user_id) for title in posts_titles]
+    session.add_all(posts)
+    await session.commit()
+    print("Post created")
+    return posts
+
+
 async def main():
     async with db_helper.session_factory() as session:
         # # await create_user(sesion=session, username="Bob")
         # # await create_user(sesion=session, username="Rock")
-        # user_bob = await get_user_by_username(sesion=session, username="Bob")
-        # user_john = await get_user_by_username(sesion=session, username="John")
+        user_bob = await get_user_by_username(sesion=session, username="Bob")
+        user_john = await get_user_by_username(sesion=session, username="John")
         # user_rock = await get_user_by_username(sesion=session, username="Rock")
         # await create_user_profile(
         #     session=session,
@@ -75,6 +88,9 @@ async def main():
         #     first_name="Luci",
         # )
         await show_users_with_profile(session=session)
+        await create_posts(session, user_bob.id, "Hello my friends")
+        await create_posts(session, user_john.id, "I learned Fast API")
+
 
 
 if __name__ == "__main__":
