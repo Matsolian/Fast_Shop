@@ -5,6 +5,7 @@ from .base import Base
 
 if TYPE_CHECKING:
     from .post import Post
+    from .profile import Profile
 
 
 class User(Base):
@@ -13,4 +14,5 @@ class User(Base):
     description: Mapped[str]
     phone: Mapped[int]
 
-    posts: Mapped[list["Post"]] = relationship(back_populates="users")
+    posts: Mapped[list["Post"]] = relationship(back_populates="user")
+    profiles: Mapped["Profile"] = relationship(back_populates="user")
