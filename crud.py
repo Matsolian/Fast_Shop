@@ -6,7 +6,9 @@ import asyncio
 from sqlalchemy import Result, select
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
+from api_v1.products.schemas import Product
 from core.models import db_helper, User, Profile, Post
+from core.models.order import Order
 
 
 async def create_user(sesion: AsyncSession, username: str) -> User:
@@ -148,8 +150,71 @@ async def main_ralations(session: AsyncSession):
     await get_profiles_with_users_with_posts(session=session)
 
 
+async def create_order(
+    session: AsyncSession,
+    promocode: str | None = None,
+) -> Order:
+    order = Order(promocode=promocode)
+
+    session.add(order)
+    await session.commit()
+    return order
+
+
+async def create_product(
+    session: AsyncSession,
+    name: str,
+    description: str,
+    price: int,
+) -> Product:
+    product = Product(
+        name=name,
+        description=description,
+        price=price,
+    )
+
+    session.add(product)
+    await session.commit()
+    return product
+
+
 async def demo_m2m(session: AsyncSession):  # many to many
-    pass
+    order = await create_order(session)
+    order = await create_order(session, promocode="promo")
+    order_1 = await create_product(
+        session,
+        name="Beard",
+        description="tasty beard",
+        price=89,
+    )
+    order_2 = await create_product(
+        session,
+        name="Milk",
+        description="tasty milk",
+        price=230,
+    )
+    order_3 = await create_product(
+        session,
+        name="Chips",
+        description="tasty Chips",
+        price=259,
+    )
+
+    order_one = await session.get(
+        Order,
+        order_one.id,
+        options=(selectinload(Order.products)),
+    )
+    order_promo = await session.get(
+        Order,
+        order_promo.id,
+        options=(selectinload(Order.products)),
+    )
+
+    order.products.append(order_1, order_2)
+    order.products.append(order_3, order_2)
+
+    await session.commit()
 
 
 async def main():
