@@ -9,7 +9,7 @@ from .mixins import UserRalationMixin
 class Post(UserRalationMixin, Base):
     # _user_nullable = False
     # _user_id_uniq: bool = False
-    _user_back_populates = "post"
+    _user_back_populates = "posts"
 
     title: Mapped[str] = mapped_column(String(100), unique=False)
     body: Mapped[str] = mapped_column(
