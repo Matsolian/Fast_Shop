@@ -20,7 +20,7 @@ class Post(UserRalationMixin, Base):
 
     def __str__(self):
         return (
-            f"{self.__class__.__name__} (id = {self.id}, title = {self.username!r}!)"
+            f"{self.__class__.__name__} (id = {self.id}, title = {self.title!r}, user_id={self.user_id})"
         )
 
     def __repr__(self):
