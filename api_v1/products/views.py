@@ -13,7 +13,7 @@ router = APIRouter(tags=["Products"])
 async def get_products(
     session: AsyncSession = Depends(
         db_helper.scooped_session_dependency
-    ),  # обратиться к текущей сессиии через Dependsю Вызываем опередлелнного официанта
+    ),  # обратиться к текущей сессиии через Depends Вызываем опередлелнного официанта
 ):
     return await crud.get_products(session=session)
 

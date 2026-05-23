@@ -5,7 +5,9 @@ from core.models import Product
 from .schemas import ProductCreate, ProductUpdate, ProductUpdatePartial
 
 
-async def get_products(session: AsyncSession) -> list[Product]:
+async def get_products(
+    session: AsyncSession,
+) -> list[Product]:
     stmt = select(Product).order_by(Product.id)  # Строим SQL-запрос.
     result: Result = await session.execute(stmt)  # Вот здесь реально идём в БД.
     products = result.scalars().all()  # Достали объекты Product из ответа
@@ -18,11 +20,17 @@ async def get_products(session: AsyncSession) -> list[Product]:
 #   - .all() — "забери все строки сразу"
 
 
-async def get_product(session: AsyncSession, product_id: int) -> Product | None:
+async def get_product(
+    session: AsyncSession,
+    product_id: int,
+) -> Product | None:
     return await session.get(Product, product_id)
 
 
-async def create_product(session: AsyncSession, product_in: ProductCreate) -> Product:
+async def create_product(
+    session: AsyncSession,
+    product_in: ProductCreate,
+) -> Product:
     product = Product(**product_in.model_dump())  # Pydantic → SQLAlchemy объект
     session.add(product)  # Добавить в очередь на запись
     await session.commit()  # Реально записать в БД
@@ -35,7 +43,9 @@ async def create_product(session: AsyncSession, product_in: ProductCreate) -> Pr
 
 
 async def update_product(
-    session: AsyncSession, product: Product, product_update: ProductUpdate
+    session: AsyncSession,
+    product: Product,
+    product_update: ProductUpdate,
 ) -> ProductUpdate:  # через put. ПОлностью заменяю все строки
     for name, value in product_update.model_dump().items():
         setattr(product, name, value)
@@ -44,7 +54,9 @@ async def update_product(
 
 
 async def update_product_partial(
-    session: AsyncSession, product: Product, product_update: ProductUpdatePartial
+    session: AsyncSession,
+    product: Product,
+    product_update: ProductUpdatePartial,
 ):  # Через Patch. Заменяю. лишь нужный атрибут
     for name, value in product_update.model_dump(exclude_unset=True).items():
         setattr(product, name, value)
@@ -67,4 +79,4 @@ async def delete_product(
     product: Product,
 ) -> None:
     await session.delete(product)
-    await session.commit()  #Необязательно, оно и так сохрпанится по умолчанию
+    await session.commit()  # Необязательно, оно и так сохранится по умолчанию
