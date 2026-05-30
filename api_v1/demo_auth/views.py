@@ -1,6 +1,8 @@
 import secrets
-from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Header, status
+import time
+from typing import Annotated, Any
+import uuid
+from fastapi import APIRouter, Depends, HTTPException, Header, status, Response, Cookie
 
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
@@ -66,9 +68,11 @@ def get_username_by_static_auth_token(
     static_token: str = Header(alias="x-secret-auth-token"),
 ) -> str:
 
-    if username := static_auth_token_to_username.get(static_token):  # тут мы прсото смотрим есть ли значение и сразу выдаем
+    if username := static_auth_token_to_username.get(
+        static_token
+    ):  # тут мы прсото смотрим есть ли значение и сразу выдаем
         return username
-    
+
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="token invalid"
     )
@@ -77,7 +81,7 @@ def get_username_by_static_auth_token(
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED, detail="token invalid"
     #     )
-    # return static_auth_token_to_username[static_token]  # тут мы еще проверку делаем 
+    # return static_auth_token_to_username[static_token]  # тут мы еще проверку делаем
 
 
 @router.get("/basic-auth_username/")
@@ -102,3 +106,47 @@ def demo_some_http_header(
     }
 
 
+COOKIES: dict[str, dict[str, Any]] = {}  # Словарь с куками
+COOKIES_SESSION_ID_KEY = "web-app-session-id"
+
+
+def generate_session_id() -> str:  # генерим случайный id
+    return uuid.uuid4().hex
+
+
+def get_session_data(
+    session_id: str = Cookie(alias=COOKIES_SESSION_ID_KEY),
+) -> dict:
+    if session_id not in COOKIES:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="not auntificated"
+        )
+
+    return COOKIES[session_id]
+
+
+@router.get("/login-cookie/")
+def demo_some_http_header(
+    responce: Response,  # нудно для работы с куки
+    auth_username: str = Depends(
+        get_username_by_static_auth_token
+    ),  # первоначальная проверка вообще пользователя, можно так-то и через basic_auth
+):
+    session_id = generate_session_id()
+    COOKIES[session_id] = {
+        "username": auth_username,
+        "login_time": int(time.time()),
+    }
+    responce.set_cookie(COOKIES_SESSION_ID_KEY, session_id)
+    return {"Result": "OK"}
+
+
+@router.get("/check_cookie")
+def demo_auth_check_cookie(
+    user_session_data: dict = Depends(get_session_data),
+):
+    username = user_session_data["username"]
+    return {
+        "message": f"hello {username}",
+        **user_session_data,
+    }
