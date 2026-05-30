@@ -115,9 +115,12 @@ def generate_session_id() -> str:  # генерим случайный id
 
 
 def get_session_data(
-    session_id: str = Cookie(alias=COOKIES_SESSION_ID_KEY),
+    session_id: str = Cookie(
+        default=None,
+        alias=COOKIES_SESSION_ID_KEY,
+    ),
 ) -> dict:
-    if session_id not in COOKIES:
+    if (session_id is None) or (session_id not in COOKIES):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="not auntificated"
         )
@@ -148,5 +151,20 @@ def demo_auth_check_cookie(
     username = user_session_data["username"]
     return {
         "message": f"hello {username}",
+        **user_session_data,
+    }
+
+
+@router.get("/logout_cookie")
+def demo_auth_logout_cookie(
+    responce: Response,
+    session_id: str = Cookie(alias=COOKIES_SESSION_ID_KEY),
+    user_session_data: dict = Depends(get_session_data),
+):
+    COOKIES.pop(session_id),
+    responce.delete_cookie(COOKIES_SESSION_ID_KEY)
+    username = user_session_data["username"]
+    return {
+        "message": f"bye, {username}",
         **user_session_data,
     }
