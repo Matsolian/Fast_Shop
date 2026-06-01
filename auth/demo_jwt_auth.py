@@ -24,7 +24,7 @@ class TokenInfo(BaseModel):
 
 # http_bearer = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/JWT/jwt/login",   # вставлдяем путь для нашей  авторизации
+    tokenUrl="/api/v1/JWT/jwt/login",   # вставляем путь для нашей  авторизации
 )
 
 router = APIRouter(prefix="/jwt", tags=["JWT"])
