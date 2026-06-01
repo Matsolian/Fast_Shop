@@ -1,3 +1,4 @@
+from jwt.exceptions import InvalidTokenError
 from fastapi import (
     APIRouter,
     Depends,
@@ -5,17 +6,21 @@ from fastapi import (
     HTTPException,
     status,
 )
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
 from user.schemas import UserSchema
 from auth import utils as auth_utils
 
-router = APIRouter(prefix="/jwt", tags=["JWT"])
-
 
 class TokenInfo(BaseModel):
     access_token: str
     token_type: str
+
+
+http_bearer = HTTPBearer()
+
+router = APIRouter(prefix="/jwt", tags=["JWT"])
 
 
 John = UserSchema(
@@ -39,10 +44,32 @@ user_db: dict[str, UserSchema] = {
 }
 
 
+def get_current_token_payload_user(
+    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+) -> UserSchema:
+    token = credentials.credentials
+    try:
+        payload = auth_utils.decode_jwt(
+            token=token,
+        )
+        return payload
+    except InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"invalid token error {e}",  # ООООООООЧень плохая праткика показывать юх
+        )
+
+
 def get_current_auth_user(
-        
-):
-    pass
+    payload: HTTPAuthorizationCredentials = Depends(get_current_token_payload_user),
+) -> UserSchema:
+    usernname: str | None = payload.get("sub")
+    if user := user_db.get(usernname):
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="token invalid(user not found)",
+    )
 
 
 def get_current_active_auth_user(
@@ -97,11 +124,14 @@ def auth_user_issue_jwt(
     )
 
 
-@router.het("/username/me/")
+@router.get("/username/me/")
 def auth_user_check_self_info(
+    payload: dict = Depends(get_current_token_payload_user),
     user: UserSchema = Depends(get_current_active_auth_user),
 ):
+    iat = payload.get("iat")
     return {
         "username": user.username,
         "email": user.email,
+        "logged_in_at": iat,
     }
