@@ -5,7 +5,7 @@ from core.config import settings
 import bcrypt
 
 
-def encode_jwt(
+def encode_jwt(  # создаёт токен.
     payload: dict,
     key: str = settings.auth_jwt.private_key_path.read_text(),  #  Обязательно приватный и добавляем read_text() чтобы прочитать и закрыть сразу
     algorithm: str = settings.auth_jwt.algorithm,
@@ -25,14 +25,14 @@ def encode_jwt(
         iat=now,
     )
     encoded = jwt.encode(
-        payload,
+        to_encode,
         key,
         algorithm=algorithm,
     )
     return encoded
 
 
-def decode_jwt(
+def decode_jwt(  # проверяет и распаковывает токен.
     token: str | bytes,
     public_key: str = settings.auth_jwt.public_key_path.read_text(),  #  Обязательно публичный и добавляем read_text() чтобы прочитать и закрыть сразу
     algorithm: str = settings.auth_jwt.algorithm,
