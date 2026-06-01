@@ -6,7 +6,11 @@ from fastapi import (
     HTTPException,
     status,
 )
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import (
+    HTTPBearer,
+    HTTPAuthorizationCredentials,
+    OAuth2PasswordBearer,
+)
 from pydantic import BaseModel
 
 from user.schemas import UserSchema
@@ -18,7 +22,10 @@ class TokenInfo(BaseModel):
     token_type: str
 
 
-http_bearer = HTTPBearer()
+# http_bearer = HTTPBearer()
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/api/v1/JWT/jwt/login",   # вставлдяем путь для нашей  авторизации
+)
 
 router = APIRouter(prefix="/jwt", tags=["JWT"])
 
@@ -45,9 +52,10 @@ user_db: dict[str, UserSchema] = {
 
 
 def get_current_token_payload_user(
-    credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
+    # credentials: HTTPAuthorizationCredentials = Depends(http_bearer),  # для brearer
+    token: str = Depends(oauth2_scheme),  
 ) -> UserSchema:
-    token = credentials.credentials
+    # token = credentials.credentials  
     try:
         payload = auth_utils.decode_jwt(
             token=token,
