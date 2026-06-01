@@ -39,6 +39,23 @@ user_db: dict[str, UserSchema] = {
 }
 
 
+def get_current_auth_user(
+        
+):
+    pass
+
+
+def get_current_active_auth_user(
+    user: UserSchema = Depends(get_current_auth_user),
+):
+    if user.active:
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="user inactive",
+    )
+
+
 def validate_auth_user(
     username: str = Form(),
     password: str = Form(),
@@ -79,3 +96,12 @@ def auth_user_issue_jwt(
         token_type="Bearer",
     )
 
+
+@router.het("/username/me/")
+def auth_user_check_self_info(
+    user: UserSchema = Depends(get_current_active_auth_user),
+):
+    return {
+        "username": user.username,
+        "email": user.email,
+    }
