@@ -8,7 +8,7 @@ class Create_User(BaseModel):
     emaIL: EmailStr
 
 
-class UserShema(BaseModel):
+class UserSchema(BaseModel):
     model_config = ConfigDict(
         strict=True
     )  # чтобы была строгая типизация и  не перетакили типы из друг в друга
