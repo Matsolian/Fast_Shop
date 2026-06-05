@@ -10,7 +10,7 @@ def encode_jwt(  # создаёт токен.
     key: str = settings.auth_jwt.private_key_path.read_text(),  #  Обязательно приватный и добавляем read_text() чтобы прочитать и закрыть сразу
     algorithm: str = settings.auth_jwt.algorithm,
     expire_timedelta: timedelta | None = None,
-    expire_minutes: int = settings.auth_jwt.access_token,
+    expire_minutes: int = settings.auth_jwt.access_token_expire_minutes,
 ):
     to_encode = payload.copy()
     now = datetime.utcnow()
