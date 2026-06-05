@@ -13,18 +13,20 @@ from fastapi.security import (
 )
 from pydantic import BaseModel
 
+from auth.helpers import create_access_token, create_refresh_token
 from user.schemas import UserSchema
 from auth import utils as auth_utils
 
 
 class TokenInfo(BaseModel):
     access_token: str
-    token_type: str
+    refresh_token: str
+    token_type: str = "Bearer"
 
 
 # http_bearer = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/v1/JWT/jwt/login",   # вставляем путь для нашей  авторизации
+    tokenUrl="/api/v1/JWT/jwt/login",  # вставляем путь для нашей  авторизации
 )
 
 router = APIRouter(prefix="/jwt", tags=["JWT"])
@@ -53,9 +55,9 @@ user_db: dict[str, UserSchema] = {
 
 def get_current_token_payload_user(
     # credentials: HTTPAuthorizationCredentials = Depends(http_bearer),  # для brearer
-    token: str = Depends(oauth2_scheme),  
+    token: str = Depends(oauth2_scheme),
 ) -> UserSchema:
-    # token = credentials.credentials  
+    # token = credentials.credentials
     try:
         payload = auth_utils.decode_jwt(
             token=token,
@@ -120,15 +122,12 @@ def validate_auth_user(
 def auth_user_issue_jwt(
     user: UserSchema = Depends(validate_auth_user),
 ):
-    jwt_payload = {
-        "sub": user.username,  # объект о чем речь, обычно это ууникальный id, но для примера и имя сойдет пока что
-        "username": user.username,
-        "email": user.email,
-    }
-    token = auth_utils.encode_jwt(jwt_payload)
+    access_token = create_access_token(user)
+    refresh_token = create_refresh_token(user)
     return TokenInfo(
-        access_token=token,
-        token_type="Bearer",
+        access_token=access_token,
+        refresh_token=refresh_token,
+        # token_type="Bearer",  # можно убрать, я же добавил в классе TokenInfo обработку
     )
 
 
