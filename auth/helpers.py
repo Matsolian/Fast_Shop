@@ -44,5 +44,5 @@ def create_refresh_token(user: UserSchema) -> str:
     return create_jwt(
         token_type=REFRESH_TOKEN_TYPE,
         token_data=jwt_payload,
-        expire_timedelta=timedelta(days=settings.auth_jwt._refresh_token_expire_days),
+        expire_timedelta=timedelta(days=settings.auth_jwt.refresh_token_expire_days),
     )
