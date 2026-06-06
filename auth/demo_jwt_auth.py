@@ -142,6 +142,11 @@ def auth_user_issue_jwt(
     )
 
 
+@router.post("/refresh/", response_model=TokenInfo)
+def auth_refresh_jwt():
+    pass
+
+
 @router.get("/username/me/")
 def auth_user_check_self_info(
     payload: dict = Depends(get_current_token_payload_user),
