@@ -13,7 +13,12 @@ from fastapi.security import (
 )
 from pydantic import BaseModel
 
-from auth.helpers import create_access_token, create_refresh_token
+from auth.helpers import (
+    create_access_token,
+    create_refresh_token,
+    TOKEN_TYPE_FIELD,
+    ACCESS_TOKEN_TYPE,
+)
 from user.schemas import UserSchema
 from auth import utils as auth_utils
 
@@ -24,12 +29,12 @@ class TokenInfo(BaseModel):
     token_type: str = "Bearer"
 
 
-# http_bearer = HTTPBearer()
+http_bearer = HTTPBearer(auto_error=False)
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/v1/JWT/jwt/login",  # вставляем путь для нашей  авторизации
 )
 
-router = APIRouter(prefix="/jwt", tags=["JWT"])
+router = APIRouter(prefix="/jwt", tags=["JWT"], dependencies=[Depends(http_bearer)])
 
 
 John = UserSchema(
@@ -73,6 +78,12 @@ def get_current_token_payload_user(
 def get_current_auth_user(
     payload: HTTPAuthorizationCredentials = Depends(get_current_token_payload_user),
 ) -> UserSchema:
+    token_type = payload.get(TOKEN_TYPE_FIELD)
+    if token_type != ACCESS_TOKEN_TYPE:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"invalid token type {token_type!r} whrere expected {ACCESS_TOKEN_TYPE!r}",
+        )
     usernname: str | None = payload.get("sub")
     if user := user_db.get(usernname):
         return user
