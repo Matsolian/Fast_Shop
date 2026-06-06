@@ -1,7 +1,6 @@
 from fastapi import (
     APIRouter,
     Depends,
-    Form,
     HTTPException,
     status,
 )
@@ -10,17 +9,18 @@ from fastapi.security import (
 )
 from pydantic import BaseModel
 
-from auth.crud import user_db
 from auth.helpers import (
     create_access_token,
     create_refresh_token,
 )
 from auth.validations import (
     get_current_auth_user,
+    get_current_auth_user_for_refresh,
     get_current_token_payload_user,
+    validate_auth_user,
+    get_current_active_auth_user,
 )
 from user.schemas import UserSchema
-from auth import utils as auth_utils
 
 
 class TokenInfo(BaseModel):
@@ -31,42 +31,6 @@ class TokenInfo(BaseModel):
 
 http_bearer = HTTPBearer(auto_error=False)
 router = APIRouter(prefix="/jwt", tags=["JWT"], dependencies=[Depends(http_bearer)])
-
-
-def get_current_active_auth_user(
-    user: UserSchema = Depends(get_current_auth_user),
-):
-    if user.active:
-        return user
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="user inactive",
-    )
-
-
-def validate_auth_user(
-    username: str = Form(),
-    password: str = Form(),
-):
-    unauthed_exc = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="invalid login or password",
-    )
-    if not (user := user_db.get(username)):
-        raise unauthed_exc
-
-    if not auth_utils.validate_passwd(
-        password=password,
-        hashed_password=user.passwd,
-    ):
-        raise unauthed_exc
-
-    if not user.active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User inactive",
-        )
-    return user
 
 
 @router.post("/login", response_model=TokenInfo)
@@ -85,10 +49,10 @@ def auth_user_issue_jwt(
 @router.post(
     "/refresh/",
     response_model=TokenInfo,
-    response_model_exclude=True,
+    response_model_exclude_none=True,
 )
-def auth_refresh_jwt():
-    access_token = create_access_token()
+def auth_refresh_jwt(user: UserSchema = Depends(get_current_auth_user_for_refresh)):
+    access_token = create_access_token(user)
 
     return TokenInfo(
         access_token=access_token,
